@@ -1,68 +1,53 @@
-from flask import Flask, request
-from flask_restful import Resource, Api
-from flask_jwt import JWT, jwt_required
+from flask import Flask
+from flask_restful import Api
+from flask_jwt import JWT
+from flask import jsonify
+
+from item import Item, Itemlist
 from user import UserRegister
-from security import authenticate, identity
+from security import authenticate, identity as identity_function
 from flask_cors import CORS
+
 import os
+from datetime import timedelta 
+
 
 app = Flask(__name__)
 app.secret_key = 'AR'
 api = Api(app)
 CORS(app, resources={r"*": {"origins": "*"}})
 
-items = []
+app.config['JWT_AUTH_URL_RULE'] = '/login' #change the URL
 
-jwt = JWT(app, authenticate, identity)   #/auth
+# config JWT to expire within half an hour
+app.config['JWT_EXPIRATION_DELTA'] = timedelta(seconds=1800)
 
-class Item(Resource):
-    
-    @jwt_required()
-    def get(self, name):
-        #for item in items:
-         #   if name == item['name']:
-          #      return item
-        #print(next(filter(lambda x: x['name'] == name, items), None))
-        item = next(filter(lambda x: x['name'] == name, items), None)
-        return {'item': item }, 200 if item is not None else 404        
+# config JWT auth key name to be 'email' instead of default 'username'
+#app.config['JWT_AUTH_USERNAME_KEY'] = 'email'
 
-    def post(self, name):
-        if next(filter(lambda x: x['name'] == name, items), None):
-            return {"message": "An item with name {} already exists".format(name)}, 400
-
-        data = request.get_json()
-        item = {'name': name, 'price': data['price']}
-        items.append(item)
-        return item, 201
-    
-    def delete(self, name):
-        global items
-        items = list(filter(lambda x: x['name'] != name, items))
-        return {'message': 'items deleted'}
-
-    def put(self, name):
-        data = request.get_json()
-        item = next(filter(lambda x: x['name'] == name, items), None)
-        if item is None:
-            item = {'name': name, 'price': data['price']}
-            items.append(item)
-        else:
-            #item = {'name': name, 'price': data['price']}
-            #print(item)
-            item.update(data)
-            #print(item)
-            #print(data)
-            #print(items)
-        return item
-
-class Itemlist(Resource):    
-    def get(self):
-        return {'items': items}
-
+#jwt = JWT(app, authenticate, identity_function)   #/auth
+jwt = JWT(app, authenticate, identity_function)   #/auth
 
 api.add_resource(Item, '/item/<string:name>')   # /student/Rolf
 api.add_resource(Itemlist, '/items')
-api.add_resource(UserRegister, '/register/<string:name>')
+#api.add_resource(UserRegister, '/register/<string:name>')
+api.add_resource(UserRegister, '/register')
+
+
+@jwt.auth_response_handler
+def customized_response_handler(access_token, identity):
+ return jsonify({
+        'access_token': access_token.decode('utf-8'),
+        'user_id': identity.id
+     })
+
+@jwt.jwt_error_handler
+def customized_error_handler(error):
+ return jsonify({
+        'message': error.description,
+        'code': error.status_code
+        }), error.status_code
 
 #app.run(host = '0.0.0.0', port = 5000, debug=True)
-app.run(host = '0.0.0.0', port=os.environ.get('PORT'), debug=True)
+if __name__ == '__main__':
+       app.run(host = '0.0.0.0', port=os.environ.get('PORT'), debug=True)

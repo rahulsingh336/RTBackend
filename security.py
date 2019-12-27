@@ -32,6 +32,9 @@ from user import User
 
 def authenticate(username, password):
     user = User.find_by_username(username)
+    print(user)
+    print(user.password)
+    print(password)
     if user and safe_str_cmp(user.password, password):
         return user
 

@@ -32,3 +32,18 @@ for row in cursor.execute(select_query):
 
 conn.commit()
 conn.close()
+
+
+@jwt.authentication_handler
+def authenticate(username, password):
+    user = User.find_by_username(username)
+    print(user)
+    print(user.password)
+    print(password)
+    if user and safe_str_cmp(user.password, password):
+        return user
+
+@jwt.identity_handler
+def identity(payload):
+    user_id = payload['identity']
+    return User.find_by_id(user_id)
