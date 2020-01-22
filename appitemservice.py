@@ -3,8 +3,8 @@ from flask_restful import Api
 from flask_jwt import JWT
 from flask import jsonify
 
-from item import Item, Itemlist
-from user import UserRegister
+from resources.item import Item, Itemlist
+from resources.user import UserRegister
 from security import authenticate, identity as identity_function
 from flask_cors import CORS
 
@@ -16,6 +16,8 @@ app = Flask(__name__)
 app.secret_key = 'AR'
 api = Api(app)
 CORS(app, resources={r"*": {"origins": "*"}})
+
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config['JWT_AUTH_URL_RULE'] = '/login' #change the URL
 
@@ -50,4 +52,6 @@ def customized_error_handler(error):
 
 #app.run(host = '0.0.0.0', port = 5000, debug=True)
 if __name__ == '__main__':
+       from db import db
+       dn.init_app(app)
        app.run(host = '0.0.0.0', port=os.environ.get('PORT'), debug=True)
