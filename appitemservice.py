@@ -38,7 +38,7 @@ jwt = JWT(app, authenticate, identity_function)   #/auth
 api.add_resource(Item, '/item/<string:name>')   # /student/Rolf
 api.add_resource(Itemlist, '/items')
 #api.add_resource(UserRegister, '/register/<string:name>')
-api.add_resource(UserRegister, '/register')
+api.add_resource(UserRegister, '/register', '/register/<string:name>')
 
 
 @jwt.auth_response_handler
