@@ -74,4 +74,4 @@ class Itemlist(Resource):
 
         connection.commit()
         connection.close()
-        return {'items': items}
+        return {'items': [item.json() for item in ItemModel.query.all()]}
