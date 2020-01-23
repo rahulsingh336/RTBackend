@@ -28,9 +28,6 @@ app.config['JWT_EXPIRATION_DELTA'] = timedelta(seconds=1800)
 # config JWT auth key name to be 'email' instead of default 'username'
 #app.config['JWT_AUTH_USERNAME_KEY'] = 'email'
 
-@app.before_first_request
-def create_tables():
-       db.create_all()
 
 #jwt = JWT(app, authenticate, identity_function)   #/auth
 jwt = JWT(app, authenticate, identity_function)   #/auth
@@ -56,7 +53,5 @@ def customized_error_handler(error):
         }), error.status_code
 
 #app.run(host = '0.0.0.0', port = 5000, debug=True)
-if __name__ == '__main__':
-       from db import db
-       db.init_app(app)
+if __name__ == '__main__':  
        app.run(host = '0.0.0.0', port=os.environ.get('PORT'), debug=True)
