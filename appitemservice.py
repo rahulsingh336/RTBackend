@@ -17,6 +17,7 @@ app.secret_key = 'AR'
 api = Api(app)
 CORS(app, resources={r"*": {"origins": "*"}})
 
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 app.config['JWT_AUTH_URL_RULE'] = '/login' #change the URL
@@ -53,5 +54,5 @@ def customized_error_handler(error):
 #app.run(host = '0.0.0.0', port = 5000, debug=True)
 if __name__ == '__main__':
        from db import db
-       dn.init_app(app)
+       db.init_app(app)
        app.run(host = '0.0.0.0', port=os.environ.get('PORT'), debug=True)
